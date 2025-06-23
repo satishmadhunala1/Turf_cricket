@@ -5,13 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npx vite build",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
-  "engines": {
-    "node": ">=18"
-  },
+  
   "dependencies": {
     "@reduxjs/toolkit": "^2.8.2",
     "autoprefixer": "^10.4.21",
