@@ -3,37 +3,32 @@ dotenv.config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+
 const userRoutes = require('./routes/userRoutes');
 const turfRoutes = require('./routes/turfRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 
-
-
-
-
 const app = express();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-    
-
-
-// Middleware
+// ✅ Use CORS middleware FIRST, and use correct origin (no trailing slash!)
 app.use(cors({
-  origin: "https://turf-cricket-frontend.onrender.com/",
+  origin: 'https://turf-cricket-frontend.onrender.com', // ✅ no slash at the end
   credentials: true
 }));
 
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Database connection
+// MongoDB connection
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.log(err));
+.then(() => console.log('✅ MongoDB connected'))
+.catch(err => console.error('❌ MongoDB connection error:', err));
 
 // Routes
 app.use('/api/users', userRoutes);
@@ -42,8 +37,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/payments', paymentRoutes);
 
-
-// Error handling middleware
+// Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
