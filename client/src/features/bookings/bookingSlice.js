@@ -7,28 +7,47 @@ export const createBooking = createAsyncThunk(
   'bookings/createBooking',
   async (bookingData, { rejectWithValue, getState }) => {
     try {
-      const {
-        auth: { userInfo },
-      } = getState();
+      const { auth: { userInfo } } = getState();
+      
+      // Validate data before sending
+      if (!bookingData.turf || !bookingData.bookingDate) {
+        throw new Error('Missing required booking data');
+      }
 
-      const config = {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
-
-      const { data } = await axios.post(
+      const response = await axios.post(
         `${BASE_URL}/api/bookings`,
         bookingData,
-        config
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+          timeout: 10000 // 10 second timeout
+        }
       );
-      return data;
+
+      // Validate response structure
+      if (!response.data || !response.data._id) {
+        throw new Error('Invalid response from server');
+      }
+
+      return response.data;
+
     } catch (error) {
+      // Enhanced error handling
+      if (error.code === 'ECONNABORTED') {
+        return rejectWithValue('Request timeout - please try again');
+      }
+      
+      if (!error.response) {
+        return rejectWithValue('Network error - no server response');
+      }
+
       return rejectWithValue(
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message
+        error.response.data?.message || 
+        error.response.data?.error || 
+        error.message || 
+        'Booking failed'
       );
     }
   }

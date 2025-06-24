@@ -13,9 +13,11 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const app = express();
 
 // ✅ Use CORS middleware FIRST, and use correct origin (no trailing slash!)
+a// Backend middleware (app.js)
 app.use(cors({
-  origin: 'https://turf-cricket-frontend.onrender.com', // ✅ no slash at the end
-  credentials: true
+  origin: 'https://turf-cricket-frontend.onrender.com',
+  methods: ['GET', 'POST', 'PUT'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Middleware

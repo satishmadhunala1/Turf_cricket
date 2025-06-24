@@ -6,44 +6,68 @@ const User = require('../models/User');
 // @desc    Create new booking
 // @route   POST /api/bookings
 // @access  Private
+// Updated createBooking controller with better error handling
 const createBooking = asyncHandler(async (req, res) => {
-  const { turf, bookingDate, startTime, endTime, totalAmount } = req.body;
+  try {
+    const { turf, bookingDate, startTime, endTime, totalAmount } = req.body;
 
-  const turfExists = await Turf.findById(turf);
-  if (!turfExists) {
-    res.status(400);
-    throw new Error('Turf not found');
-  }
+    // Validate required fields
+    if (!turf || !bookingDate || !startTime || !endTime || !totalAmount) {
+      return res.status(400).json({ message: 'Please fill all fields' });
+    }
 
-  // Check for overlapping bookings
-  const overlappingBooking = await Booking.findOne({
-    turf,
-    bookingDate,
-    $or: [
-      { startTime: { $lt: endTime }, endTime: { $gt: startTime } },
-    ],
-  });
+    const turfExists = await Turf.findById(turf);
+    if (!turfExists) {
+      return res.status(404).json({ message: 'Turf not found' });
+    }
 
-  if (overlappingBooking) {
-    res.status(400);
-    throw new Error('This slot is already booked');
-  }
+    // Check for overlapping bookings (improved query)
+    const overlappingBooking = await Booking.findOne({
+      turf,
+      bookingDate,
+      $or: [
+        { 
+          startTime: { $lt: endTime }, 
+          endTime: { $gt: startTime } 
+        },
+      ],
+      status: { $ne: 'Cancelled' } // Ignore cancelled bookings
+    });
 
-  const booking = await Booking.create({
-    user: req.user._id,
-    turf,
-    bookingDate,
-    startTime,
-    endTime,
-    totalAmount,
-    paymentStatus: 'Pending',
-  });
+    if (overlappingBooking) {
+      return res.status(409).json({ 
+        message: 'This slot is already booked',
+        conflictingBooking: overlappingBooking 
+      });
+    }
 
-  if (booking) {
-    res.status(201).json(booking);
-  } else {
-    res.status(400);
-    throw new Error('Invalid booking data');
+    const booking = await Booking.create({
+      user: req.user._id,
+      turf,
+      bookingDate,
+      startTime,
+      endTime,
+      totalAmount,
+      paymentStatus: 'Pending',
+    });
+
+    return res.status(201).json({
+      _id: booking._id,
+      turf: booking.turf,
+      user: booking.user,
+      bookingDate: booking.bookingDate,
+      startTime: booking.startTime,
+      endTime: booking.endTime,
+      totalAmount: booking.totalAmount,
+      paymentStatus: booking.paymentStatus
+    });
+
+  } catch (error) {
+    console.error('Booking creation error:', error);
+    return res.status(500).json({ 
+      message: 'Server error during booking creation',
+      error: error.message 
+    });
   }
 });
 
