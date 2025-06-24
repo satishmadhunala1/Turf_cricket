@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { BASE_URL } from '../../constants'; // adjust path if needed
 
 // Async thunks
 export const login = createAsyncThunk(
@@ -13,7 +14,7 @@ export const login = createAsyncThunk(
       };
 
       const { data } = await axios.post(
-        '/api/users/login',
+        `${BASE_URL}/api/users/login`,
         { email, password },
         config
       );
@@ -42,7 +43,7 @@ export const register = createAsyncThunk(
       };
 
       const { data } = await axios.post(
-        '/api/users/register',
+        `${BASE_URL}/api/users/register`,
         { name, email, password },
         config
       );
