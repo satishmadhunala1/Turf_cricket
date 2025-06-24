@@ -71,8 +71,8 @@ const TurfDetailsPage = () => {
     navigate('/login');
     return;
   }
+  
   const confirmed = window.confirm('You need to pay ₹300 as an advance payment. Do you want to continue?');
-
   if (!confirmed) return;
 
   try {
@@ -91,19 +91,31 @@ const TurfDetailsPage = () => {
       }),
     });
 
+    // First check if the response is OK (status 200-299)
+    if (!res.ok) {
+      const errorData = await res.text(); // Try to read as text first
+      try {
+        // If it might be JSON, try to parse
+        const jsonError = JSON.parse(errorData);
+        throw new Error(jsonError.message || 'Payment failed');
+      } catch {
+        throw new Error(errorData || 'Payment failed');
+      }
+    }
+
+    // If response is OK, try to parse as JSON
     const data = await res.json();
 
     if (data.url) {
       window.location.href = data.url; // Redirect to Stripe Checkout
     } else {
-      alert('Unable to initiate payment. Please try again.');
+      throw new Error('No URL received from server');
     }
   } catch (error) {
     console.error('Stripe checkout error:', error);
-    alert('Payment failed. Please check console for more info.');
+    alert(`Payment failed: ${error.message}`);
   }
 };
-
 
   if (loading) return <Loader />;
   if (error) return <Message variant="danger">{error}</Message>;
