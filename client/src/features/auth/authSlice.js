@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { BASE_URL } from '../../constants'; // adjust path if needed
+import { BASE_URL } from '../../constants'; // Adjust path if needed
 
 // Async thunks
 export const login = createAsyncThunk(
@@ -20,7 +20,6 @@ export const login = createAsyncThunk(
       );
 
       localStorage.setItem('userInfo', JSON.stringify(data));
-
       return data;
     } catch (error) {
       return rejectWithValue(
@@ -49,7 +48,6 @@ export const register = createAsyncThunk(
       );
 
       localStorage.setItem('userInfo', JSON.stringify(data));
-
       return data;
     } catch (error) {
       return rejectWithValue(
@@ -109,5 +107,4 @@ const authSlice = createSlice({
 });
 
 export const { logout } = authSlice.actions;
-
 export default authSlice.reducer;

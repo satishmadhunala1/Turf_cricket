@@ -15,13 +15,17 @@ const paymentRoutes = require('./routes/paymentRoutes');
 
 const app = express();
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+    
+
+
 // Middleware
 app.use(cors({
   origin: "https://turf-cricket-frontend.onrender.com/",
   credentials: true
 }));
 
-app.use(express.json());
 
 // Database connection
 mongoose.connect(process.env.MONGODB_URI, {
