@@ -1,5 +1,5 @@
 // src/utils/stripe.js
-import { BASE_URL } from '../../constants'; // Make sure this path is correct
+import { BASE_URL } from '.././constants'; // Make sure this path is correct
 
 export const handleStripePayment = async (bookingDetails) => {
   try {
