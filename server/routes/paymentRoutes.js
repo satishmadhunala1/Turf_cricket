@@ -37,8 +37,9 @@ router.post('/create-checkout-session', setCorsHeaders, async (req, res) => {
       }],
       mode: 'payment',
       metadata: { turfId, userId, bookingDate, startTime, endTime },
-      success_url: `${process.env.FRONTEND_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.FRONTEND_URL}/payment-cancel`,
+      success_url: `${process.env.FRONTEND_URL.trim()}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.FRONTEND_URL.trim()}/payment-cancel`,
+
     });
 
     return res.status(200).json({ url: session.url });
