@@ -1,17 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const Stripe = require('stripe');
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY); // Keep secret key in .env
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 router.post('/create-checkout-session', async (req, res) => {
   const { turfId, userId, bookingDate, startTime, endTime } = req.body;
-
-  console.log('📥 Incoming Stripe payment request:');
-  console.log('➡️ turfId:', turfId);
-  console.log('➡️ userId:', userId);
-  console.log('➡️ bookingDate:', bookingDate);
-  console.log('➡️ startTime:', startTime);
-  console.log('➡️ endTime:', endTime);
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -21,10 +14,10 @@ router.post('/create-checkout-session', async (req, res) => {
           price_data: {
             currency: 'inr',
             product_data: {
-              name: 'Turf Advance Booking',
-              description: `Turf ID: ${turfId}, Date: ${bookingDate}`,
+              name: 'Turf Booking',
+              description: `Date: ${bookingDate}`,
             },
-            unit_amount: 30000, // ₹300 in paise
+            unit_amount: 30000, // ₹300
           },
           quantity: 1,
         },
@@ -34,17 +27,12 @@ router.post('/create-checkout-session', async (req, res) => {
       cancel_url: `https://turf-cricket-frontend.onrender.com/payment-cancel`,
     });
 
-    console.log('✅ Stripe session created successfully:');
-    console.log('🔗 Checkout URL:', session.url);
-
-    // Always return a proper JSON response
+    // ✅ Always send back JSON
     return res.status(200).json({ url: session.url });
-  } catch (err) {
-    console.error('❌ Stripe error:', err.message || err);
 
-    return res.status(500).json({
-      error: err.message || 'Stripe session creation failed',
-    });
+  } catch (error) {
+    console.error('❌ Stripe session creation failed:', error);
+    return res.status(500).json({ error: 'Stripe session creation failed' });
   }
 });
 
