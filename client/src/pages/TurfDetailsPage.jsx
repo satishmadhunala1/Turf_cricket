@@ -64,23 +64,26 @@ const TurfDetailsPage = () => {
     setHours(calculatedHours);
   };
 
- const submitHandler = async (e) => {
+const submitHandler = async (e) => {
   e.preventDefault();
 
   if (!userInfo) {
     navigate('/login');
     return;
   }
-  
+
   const confirmed = window.confirm('You need to pay ₹300 as an advance payment. Do you want to continue?');
   if (!confirmed) return;
 
   try {
-    const res = await fetch('/api/payments/create-checkout-session', {
+    // Add credentials to include cookies (for JWT auth)
+    const res = await fetch('https://turf-cricket-backend.onrender.com/api/payments/create-checkout-session', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userInfo.token}`, // Add if using JWT
       },
+      credentials: 'include', // Required for cookies/sessions
       body: JSON.stringify({
         turfId: id,
         userId: userInfo._id,
@@ -91,32 +94,27 @@ const TurfDetailsPage = () => {
       }),
     });
 
-    // First check if the response is OK (status 200-299)
-    if (!res.ok) {
-      const errorData = await res.text(); // Try to read as text first
-      try {
-        // If it might be JSON, try to parse
-        const jsonError = JSON.parse(errorData);
-        throw new Error(jsonError.message || 'Payment failed');
-      } catch {
-        throw new Error(errorData || 'Payment failed');
-      }
+    // Handle non-JSON responses
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error(text || 'Payment failed');
     }
 
-    // If response is OK, try to parse as JSON
-    const data = await res.json();
-
-    if (data.url) {
-      window.location.href = data.url; // Redirect to Stripe Checkout
-    } else {
-      throw new Error('No URL received from server');
+    if (!data.url) {
+      throw new Error(data.message || 'No checkout URL received');
     }
+
+    // Force redirect (replace entire page)
+    window.location.replace(data.url);
+
   } catch (error) {
-    console.error('Stripe checkout error:', error);
+    console.error('Payment error:', error);
     alert(`Payment failed: ${error.message}`);
   }
 };
-
   if (loading) return <Loader />;
   if (error) return <Message variant="danger">{error}</Message>;
   if (!turf) return <Message variant="info">Turf not found</Message>;
