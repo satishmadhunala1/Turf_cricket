@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { BASE_URL } from '../../constants'; // Adjust path if needed
 
 // Async thunks
 export const createBooking = createAsyncThunk(
@@ -17,7 +18,11 @@ export const createBooking = createAsyncThunk(
         },
       };
 
-      const { data } = await axios.post('/api/bookings', bookingData, config);
+      const { data } = await axios.post(
+        `${BASE_URL}/api/bookings`,
+        bookingData,
+        config
+      );
       return data;
     } catch (error) {
       return rejectWithValue(
@@ -43,7 +48,10 @@ export const getMyBookings = createAsyncThunk(
         },
       };
 
-      const { data } = await axios.get('/api/bookings/mybookings', config);
+      const { data } = await axios.get(
+        `${BASE_URL}/api/bookings/mybookings`,
+        config
+      );
       return data;
     } catch (error) {
       return rejectWithValue(
@@ -69,7 +77,10 @@ export const getBookings = createAsyncThunk(
         },
       };
 
-      const { data } = await axios.get('/api/admin/bookings', config);
+      const { data } = await axios.get(
+        `${BASE_URL}/api/admin/bookings`,
+        config
+      );
       return data;
     } catch (error) {
       return rejectWithValue(
@@ -97,7 +108,7 @@ export const updateBookingStatus = createAsyncThunk(
       };
 
       const { data } = await axios.put(
-        `/api/admin/bookings/${id}`,
+        `${BASE_URL}/api/admin/bookings/${id}`,
         { status },
         config
       );

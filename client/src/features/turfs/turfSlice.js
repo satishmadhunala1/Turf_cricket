@@ -1,18 +1,17 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { BASE_URL } from '../../constants'; // adjust path as needed
 
 // Async thunks
 export const getTurfs = createAsyncThunk(
   'turfs/getTurfs',
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get('/api/turfs');
+      const { data } = await axios.get(`${BASE_URL}/api/turfs`);
       return data;
     } catch (error) {
       return rejectWithValue(
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message
+        error.response?.data?.message || error.message
       );
     }
   }
@@ -22,13 +21,11 @@ export const getTurfById = createAsyncThunk(
   'turfs/getTurfById',
   async (id, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(`/api/turfs/${id}`);
+      const { data } = await axios.get(`${BASE_URL}/api/turfs/${id}`);
       return data;
     } catch (error) {
       return rejectWithValue(
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message
+        error.response?.data?.message || error.message
       );
     }
   }
@@ -49,13 +46,11 @@ export const createTurf = createAsyncThunk(
         },
       };
 
-      const { data } = await axios.post('/api/admin/turfs', turfData, config);
+      const { data } = await axios.post(`${BASE_URL}/api/admin/turfs`, turfData, config);
       return data;
     } catch (error) {
       return rejectWithValue(
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message
+        error.response?.data?.message || error.message
       );
     }
   }
@@ -77,16 +72,14 @@ export const updateTurf = createAsyncThunk(
       };
 
       const { data } = await axios.put(
-        `/api/admin/turfs/${turfData._id}`,
+        `${BASE_URL}/api/admin/turfs/${turfData._id}`,
         turfData,
         config
       );
       return data;
     } catch (error) {
       return rejectWithValue(
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message
+        error.response?.data?.message || error.message
       );
     }
   }
@@ -106,13 +99,11 @@ export const deleteTurf = createAsyncThunk(
         },
       };
 
-      await axios.delete(`/api/admin/turfs/${id}`, config);
+      await axios.delete(`${BASE_URL}/api/admin/turfs/${id}`, config);
       return id;
     } catch (error) {
       return rejectWithValue(
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message
+        error.response?.data?.message || error.message
       );
     }
   }

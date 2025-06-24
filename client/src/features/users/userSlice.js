@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { BASE_URL } from '../../constants'; // adjust path as needed
 
 // Async thunks
 export const getUsers = createAsyncThunk(
@@ -16,13 +17,11 @@ export const getUsers = createAsyncThunk(
         },
       };
 
-      const { data } = await axios.get('/api/admin/users', config);
+      const { data } = await axios.get(`${BASE_URL}/api/admin/users`, config);
       return data;
     } catch (error) {
       return rejectWithValue(
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message
+        error.response?.data?.message || error.message
       );
     }
   }
@@ -42,13 +41,11 @@ export const deleteUser = createAsyncThunk(
         },
       };
 
-      await axios.delete(`/api/admin/users/${id}`, config);
+      await axios.delete(`${BASE_URL}/api/admin/users/${id}`, config);
       return id;
     } catch (error) {
       return rejectWithValue(
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message
+        error.response?.data?.message || error.message
       );
     }
   }
