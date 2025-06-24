@@ -67,54 +67,38 @@ const TurfDetailsPage = () => {
 const submitHandler = async (e) => {
   e.preventDefault();
 
-  if (!userInfo) {
-    navigate('/login');
-    return;
-  }
-
-  const confirmed = window.confirm('You need to pay ₹300 as an advance payment. Do you want to continue?');
-  if (!confirmed) return;
-
   try {
-    // Add credentials to include cookies (for JWT auth)
-    const res = await fetch('https://turf-cricket-backend.onrender.com/api/payments/create-checkout-session', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${userInfo.token}`, // Add if using JWT
-      },
-      credentials: 'include', // Required for cookies/sessions
-      body: JSON.stringify({
-        turfId: id,
-        userId: userInfo._id,
-        amount: 300,
-        bookingDate,
-        startTime,
-        endTime,
-      }),
-    });
+    const res = await fetch(
+      "https://turf-cricket-backend.onrender.com/api/payments/create-checkout-session",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // Include Authorization header if using JWT
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+        credentials: "include", // Required for cookies
+        body: JSON.stringify({
+          turfId: id,
+          userId: userInfo._id,
+          amount: 300,
+          bookingDate,
+          startTime,
+          endTime,
+        }),
+      }
+    );
 
-    // Handle non-JSON responses
-    const text = await res.text();
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      throw new Error(text || 'Payment failed');
-    }
+    if (!res.ok) throw new Error("Payment failed");
 
-    if (!data.url) {
-      throw new Error(data.message || 'No checkout URL received');
-    }
-
-    // Force redirect (replace entire page)
-    window.location.replace(data.url);
-
+    const data = await res.json();
+    window.location.href = data.url; // Redirect to Stripe
   } catch (error) {
-    console.error('Payment error:', error);
-    alert(`Payment failed: ${error.message}`);
+    console.error("Payment error:", error);
+    alert("Payment failed. Please try again.");
   }
 };
+
   if (loading) return <Loader />;
   if (error) return <Message variant="danger">{error}</Message>;
   if (!turf) return <Message variant="info">Turf not found</Message>;
