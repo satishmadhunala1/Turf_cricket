@@ -12,9 +12,6 @@ const paymentRoutes = require('./routes/paymentRoutes');
 
 const app = express();
 
-// ✅ Use CORS middleware FIRST, and use correct origin (no trailing slash!)
-const cors = require("cors");
-
 // Allow only your frontend URL + credentials
 app.use(
   cors({
