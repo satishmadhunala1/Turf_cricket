@@ -16,7 +16,11 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: "https://turf-cricket-frontend.onrender.com/",
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Database connection
