@@ -18,8 +18,10 @@ const cors = require("cors");
 // Allow only your frontend URL + credentials
 app.use(
   cors({
-    origin: "https://turf-cricket-frontend.onrender.com", // Your frontend URL
-    credentials: true, // Required for cookies/sessions
+    origin: 'https://turf-cricket-frontend.onrender.com',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
   })
 );
 // Middleware
