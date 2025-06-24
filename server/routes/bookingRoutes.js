@@ -4,6 +4,9 @@ const { createBooking, getMyBookings } = require('../controllers/bookingControll
 const { protect } = require('../middleware/authMiddleware');
 
 router.post('/', protect, createBooking);
+// In routes/bookingRoutes.js
+router.post('/api/bookings', createBooking);
+
 router.get('/mybookings', protect, getMyBookings);
 
 module.exports = router;
