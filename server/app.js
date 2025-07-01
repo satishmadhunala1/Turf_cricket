@@ -15,12 +15,13 @@ const app = express();
 // Allow only your frontend URL + credentials
 app.use(
   cors({
-    origin: 'https://turf-cricket-frontend.onrender.com',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+    origin: ['https://turf-cricket-frontend.onrender.com', 'http://localhost:5174'], 
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
   })
 );
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
