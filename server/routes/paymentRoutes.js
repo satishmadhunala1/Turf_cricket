@@ -24,7 +24,7 @@ router.post('/create-checkout-session', async (req, res) => {
       ],
       mode: 'payment',
       success_url: `https://turf-cricket-frontend.onrender.com/payment-success?turfId=${turfId}&userId=${userId}&date=${bookingDate}&start=${startTime}&end=${endTime}`,
-      cancel_url: 'https://turf-cricket-frontend.onrender.comchanges/payment-cancel',
+      cancel_url: 'https://turf-cricket-frontend.onrender.com/payment-cancel',
     });
 
     res.json({ url: session.url });

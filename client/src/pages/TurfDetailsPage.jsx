@@ -6,6 +6,7 @@ import Loader from "../components/Loader";
 import Message from "../components/Message";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import API from "../api"; 
 
 const TurfDetailsPage = () => {
   const { id } = useParams();
@@ -98,27 +99,24 @@ const TurfDetailsPage = () => {
     if (!confirmed) return;
 
     try {
-      const res = await fetch("/api/payments/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          turfId: id,
-          userId: userInfo._id,
-          amount: 300,
-          bookingDate,
-          startTime,
-          endTime,
-        }),
-      });
+      setLoading(true);
+    const res = await API.post("/api/payments/create-checkout-session", {
+      turfId: id,
+      userId: userInfo._id,
+      bookingDate,
+      startTime,
+      endTime,
+    });
 
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-      else alert("Unable to initiate payment. Please try again.");
-    } catch (error) {
-      console.error("Stripe checkout error:", error);
-      alert("Payment failed. Please check console.");
-    }
-  };
+    const { url } = res.data;
+    if (url) window.location.href = url;
+    else alert("Unable to initiate payment. Please try again.");
+  } catch (error) {
+    console.error("Stripe checkout error:", error);
+    alert("Payment failed. Please check console.");
+  } finally {
+    setLoading(false);
+  }
 
   if (loading) return <Loader />;
   if (error) return <Message variant="danger">{error}</Message>;
