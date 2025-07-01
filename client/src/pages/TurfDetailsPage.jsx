@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getTurfById } from "../features/turfs/turfSlice";
+import { createBooking } from "../features/bookings/bookingSlice";
 import Loader from "../components/Loader";
 import Message from "../components/Message";
 import DatePicker from "react-datepicker";
@@ -19,106 +20,91 @@ const TurfDetailsPage = () => {
 
   const { turf, loading, error } = useSelector((state) => state.turfs);
   const { userInfo } = useSelector((state) => state.auth);
+  const { loading: loadingBooking, success: successBooking } = useSelector(
+    (state) => state.bookings
+  );
 
   useEffect(() => {
     dispatch(getTurfById(id));
   }, [dispatch, id]);
 
   useEffect(() => {
-    const calculatedHours = calculateHours(startTime, endTime);
-    setHours(calculatedHours);
-  }, [startTime, endTime]);
-
-  // Utility functions
-  const toMinutes = (timeStr) => {
-    const [h, m] = timeStr.split(":").map(Number);
-    return h * 60 + m;
-  };
-
-  const isToday = (date) => {
-    const today = new Date();
-    return (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
-    );
-  };
-
-  const formatTime = (hour) => {
-    return `${hour.toString().padStart(2, "0")}:00`;
-  };
-
-  const getStartOptions = () => {
-    const currentMinutes = new Date().getHours() * 60 + new Date().getMinutes();
-    return Array.from({ length: 24 }, (_, i) => {
-      const time = formatTime(i);
-      return isToday(bookingDate) && toMinutes(time) <= currentMinutes
-        ? null
-        : time;
-    }).filter(Boolean);
-  };
-
-  const getEndOptions = () => {
-    const startMinutes = toMinutes(startTime);
-    const currentMinutes = new Date().getHours() * 60 + new Date().getMinutes();
-    return Array.from({ length: 24 }, (_, i) => {
-      const time = formatTime(i);
-      const minutes = toMinutes(time);
-      return minutes <= startMinutes ||
-        (isToday(bookingDate) && minutes <= currentMinutes)
-        ? null
-        : time;
-    }).filter(Boolean);
-  };
+    if (successBooking) {
+      navigate("/my-bookings");
+    }
+  }, [successBooking, navigate]);
 
   const calculateHours = (start, end) => {
     const [startHour, startMinute] = start.split(":").map(Number);
     const [endHour, endMinute] = end.split(":").map(Number);
+
     let totalHours = endHour - startHour;
     let totalMinutes = endMinute - startMinute;
+
     if (totalMinutes < 0) {
       totalHours -= 1;
       totalMinutes += 60;
     }
+
     return totalHours + totalMinutes / 60;
   };
 
   const handleTimeChange = (type, value) => {
-    if (type === "start") setStartTime(value);
-    else setEndTime(value);
-  };
-
-  const submitHandler = async (e) => {
-    e.preventDefault();
-    if (!userInfo) return navigate("/login");
-
-    const confirmed = window.confirm(
-      "You need to pay ₹300 as an advance payment. Do you want to continue?"
-    );
-    if (!confirmed) return;
-
-    try {
-      const res = await fetch("/api/payments/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          turfId: id,
-          userId: userInfo._id,
-          amount: 300,
-          bookingDate,
-          startTime,
-          endTime,
-        }),
-      });
-
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-      else alert("Unable to initiate payment. Please try again.");
-    } catch (error) {
-      console.error("Stripe checkout error:", error);
-      alert("Payment failed. Please check console.");
+    if (type === "start") {
+      setStartTime(value);
+    } else {
+      setEndTime(value);
     }
+
+    const calculatedHours = calculateHours(
+      type === "start" ? value : startTime,
+      type === "end" ? value : endTime
+    );
+
+    setHours(calculatedHours);
   };
+
+ const submitHandler = async (e) => {
+  e.preventDefault();
+
+  if (!userInfo) {
+    navigate('/login');
+    return;
+  }
+
+  const confirmed = window.confirm('You need to pay ₹300 as an advance payment. Do you want to continue?');
+
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch('/api/payments/create-checkout-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        turfId: id,
+        userId: userInfo._id,
+        amount: 300,
+        bookingDate,
+        startTime,
+        endTime,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url; // Redirect to Stripe Checkout
+    } else {
+      alert('Unable to initiate payment. Please try again.');
+    }
+  } catch (error) {
+    console.error('Stripe checkout error:', error);
+    alert('Payment failed. Please check console for more info.');
+  }
+};
+
 
   if (loading) return <Loader />;
   if (error) return <Message variant="danger">{error}</Message>;
@@ -208,7 +194,10 @@ const TurfDetailsPage = () => {
                 onChange={(e) => handleTimeChange("start", e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
               >
-                {getStartOptions().map((time) => (
+                {Array.from({ length: 13 }, (_, i) => {
+                  const hour = i + 8;
+                  return `${hour.toString().padStart(2, "0")}:00`;
+                }).map((time) => (
                   <option key={time} value={time}>
                     {time}
                   </option>
@@ -225,7 +214,10 @@ const TurfDetailsPage = () => {
                 onChange={(e) => handleTimeChange("end", e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
               >
-                {getEndOptions().map((time) => (
+                {Array.from({ length: 13 }, (_, i) => {
+                  const hour = i + 9;
+                  return `${hour.toString().padStart(2, "0")}:00`;
+                }).map((time) => (
                   <option key={time} value={time}>
                     {time}
                   </option>
@@ -258,9 +250,10 @@ const TurfDetailsPage = () => {
           <div className="mt-6">
             <button
               type="submit"
+              disabled={loadingBooking}
               className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-md shadow-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
             >
-              Book Now
+              {loadingBooking ? "Processing..." : "Book Now"}
             </button>
           </div>
         </form>
