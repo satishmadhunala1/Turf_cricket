@@ -29,7 +29,6 @@ const TurfDetailsPage = () => {
     setHours(calculatedHours);
   }, [startTime, endTime]);
 
-  // Utility functions
   const toMinutes = (timeStr) => {
     const [h, m] = timeStr.split(":").map(Number);
     return h * 60 + m;
@@ -98,25 +97,39 @@ const TurfDetailsPage = () => {
     if (!confirmed) return;
 
     try {
-      const res = await fetch("/api/payments/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          turfId: id,
-          userId: userInfo._id,
-          amount: 300,
-          bookingDate,
-          startTime,
-          endTime,
-        }),
-      });
+      const res = await fetch(
+        "https://turf-cricket-backend.onrender.com/api/payments/create-checkout-session",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            turfId: id,
+            userId: userInfo._id,
+            amount: 300,
+            bookingDate,
+            startTime,
+            endTime,
+          }),
+        }
+      );
 
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-      else alert("Unable to initiate payment. Please try again.");
+      let data;
+      try {
+        data = await res.json();
+      } catch (err) {
+        console.error("Invalid JSON response");
+        alert("Server error: Invalid response");
+        return;
+      }
+
+      if (data.url) {
+        window.location.href = data.url; // ✅ redirect to Stripe
+      } else {
+        alert("Unable to initiate payment. Please try again.");
+      }
     } catch (error) {
       console.error("Stripe checkout error:", error);
-      alert("Payment failed. Please check console.");
+      alert("Payment failed. Please try again later.");
     }
   };
 

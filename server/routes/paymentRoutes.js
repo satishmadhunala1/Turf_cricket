@@ -5,6 +5,8 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY); // Store in .env
 
 router.post('/create-checkout-session', async (req, res) => {
   const { turfId, userId, bookingDate, startTime, endTime } = req.body;
+    console.log("Received payment request:", req.body);
+
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -26,8 +28,9 @@ router.post('/create-checkout-session', async (req, res) => {
       success_url: `https://turf-cricket-frontend.onrender.com/payment-success?turfId=${turfId}&userId=${userId}&date=${bookingDate}&start=${startTime}&end=${endTime}`,
       cancel_url: 'https://turf-cricket-frontend.onrender.com/payment-cancel',
     });
-
-    res.json({ url: session.url });
+        console.log("Stripe session created:", session.url);
+        res.status(200).json({ url: session.url });
+      
   } catch (err) {
     console.error('Stripe error:', err.message);
     res.status(500).json({ error: 'Stripe session creation failed' });
