@@ -114,16 +114,17 @@ const TurfDetailsPage = () => {
   } catch (error) {
     console.error("Stripe checkout error:", error);
     alert("Payment failed. Please check console.");
-  } finally {
-    setLoading(false);
-  }
-
-  if (loading) return <Loader />;
-  if (error) return <Message variant="danger">{error}</Message>;
-  if (!turf) return <Message variant="info">Turf not found</Message>;
-
-  return (
-    <div className="container mx-auto px-4 py-8">
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+    if (loading) return <Loader />;
+    if (error) return <Message variant="danger">{error}</Message>;
+    if (!turf) return <Message variant="info">Turf not found</Message>;
+  
+    return (
+      <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
           <img
