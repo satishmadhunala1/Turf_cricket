@@ -5,6 +5,7 @@ import { Mail, KeyRound, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { authApi } from '../../api/endpoints';
 import { PageTransition } from '../../components/motion/Motion';
+import AuthLayout from '../../components/layout/AuthLayout';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 
@@ -42,11 +43,11 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <PageTransition className="min-h-screen flex items-center justify-center px-4 pt-20 pb-12">
-      <div className="w-full max-w-md">
+    <AuthLayout>
+      <PageTransition>
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold">Reset Password</h1>
-          <p className="text-slate-400 mt-2">{step === 1 ? 'Enter your email to receive OTP' : 'Enter OTP and new password'}</p>
+          <h1 className="text-2xl font-bold text-slate-900">Reset Password</h1>
+          <p className="text-slate-500 mt-2">{step === 1 ? 'Enter your email to receive OTP' : 'Enter OTP and new password'}</p>
         </div>
 
         <form onSubmit={handleSubmit(step === 1 ? sendOtp : resetPassword)} className="glass-card rounded-2xl p-8 space-y-5">
@@ -66,9 +67,9 @@ export default function ForgotPasswordPage() {
             {step === 1 ? 'Send OTP' : 'Reset Password'}
           </Button>
 
-          <Link to="/login" className="block text-center text-sm text-brand-400">← Back to login</Link>
+          <Link to="/login" className="block text-center text-sm text-brand-600 hover:underline">← Back to login</Link>
         </form>
-      </div>
-    </PageTransition>
+      </PageTransition>
+    </AuthLayout>
   );
 }

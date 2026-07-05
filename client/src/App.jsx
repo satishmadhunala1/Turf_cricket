@@ -31,11 +31,13 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          {/* Auth — no navbar / footer */}
+          <Route path="login" element={<LoginPage />} />
+          <Route path="register" element={<RegisterPage />} />
+          <Route path="forgot-password" element={<ForgotPasswordPage />} />
+
           <Route element={<MainLayout />}>
             <Route index element={<LandingPage />} />
-            <Route path="login" element={<LoginPage />} />
-            <Route path="register" element={<RegisterPage />} />
-            <Route path="forgot-password" element={<ForgotPasswordPage />} />
             <Route path="turfs" element={<TurfListPage />} />
             <Route path="turfs/:id" element={<TurfDetailPage />} />
             <Route path="book/:id" element={<BookingPage />} />

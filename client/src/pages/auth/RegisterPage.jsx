@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { authApi } from '../../api/endpoints';
 import { useAuth } from '../../context/AuthContext';
 import { PageTransition } from '../../components/motion/Motion';
+import AuthLayout from '../../components/layout/AuthLayout';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import GoogleLoginButton from '../../components/auth/GoogleLoginButton';
@@ -45,10 +46,10 @@ export default function RegisterPage() {
   };
 
   return (
-    <PageTransition className="min-h-screen flex items-center justify-center px-4 pt-20 pb-12 bg-slate-50">
-      <div className="w-full max-w-md">
+    <AuthLayout>
+      <PageTransition>
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold mt-6 text-slate-900">Create your account</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Create your account</h1>
           <p className="text-slate-500 mt-2">Join thousands of sports enthusiasts</p>
         </div>
 
@@ -87,7 +88,7 @@ export default function RegisterPage() {
             </p>
           </form>
         </div>
-      </div>
-    </PageTransition>
+      </PageTransition>
+    </AuthLayout>
   );
 }
