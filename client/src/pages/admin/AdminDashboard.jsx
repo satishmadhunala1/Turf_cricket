@@ -1,97 +1,84 @@
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getTurfs } from '../../features/turfs/turfSlice';
-import { getUsers } from '../../features/users/userSlice';
-import { getBookings } from '../../features/bookings/bookingSlice';
-import StatCard from '../../components/admin/StatCard';
-import Loader from '../../components/Loader';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Users, MapPin, Calendar, DollarSign, TrendingUp } from 'lucide-react';
+import { adminApi } from '../../api/endpoints';
+import Badge from '../../components/ui/Badge';
+import { Skeleton } from '../../components/ui/Skeleton';
 
-const AdminDashboard = () => {
-  const dispatch = useDispatch();
-  
-  const { turfs, loading: turfsLoading } = useSelector((state) => state.turfs);
-  const { users, loading: usersLoading } = useSelector((state) => state.users);
-  const { bookings, loading: bookingsLoading } = useSelector((state) => state.bookings);
+function StatCard({ icon: Icon, label, value, color }) {
+  return (
+    <div className="glass-card rounded-2xl p-5">
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
+        <Icon className="w-5 h-5" />
+      </div>
+      <p className="text-sm text-slate-500 mt-4">{label}</p>
+      <p className="text-2xl font-bold mt-1 text-slate-900">{value}</p>
+    </div>
+  );
+}
+
+const statusVariant = { pending: 'warning', confirmed: 'success', cancelled: 'danger', completed: 'default' };
+const paymentVariant = { pending: 'warning', completed: 'success', failed: 'danger', processing: 'warning', refunded: 'default' };
+
+export default function AdminDashboard() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    dispatch(getTurfs());
-    dispatch(getUsers());
-    dispatch(getBookings());
-  }, [dispatch]);
+    adminApi.getDashboard().then(({ data: res }) => setData(res.data)).finally(() => setLoading(false));
+  }, []);
 
-  if (turfsLoading || usersLoading || bookingsLoading) return <Loader />;
+  if (loading) return <div className="pt-24 px-4 max-w-7xl mx-auto grid grid-cols-4 gap-4">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32" />)}</div>;
 
-  const totalRevenue = bookings.reduce((sum, booking) => sum + booking.totalAmount, 0);
+  const { stats, recentBookings } = data || {};
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard 
-          title="Total Turfs" 
-          value={turfs.length} 
-          icon="🏏" 
-          color="bg-green-100 text-green-800"
-        />
-        <StatCard 
-          title="Total Users" 
-          value={users.length} 
-          icon="👥" 
-          color="bg-blue-100 text-blue-800"
-        />
-        <StatCard 
-          title="Total Bookings" 
-          value={bookings.length} 
-          icon="📅" 
-          color="bg-purple-100 text-purple-800"
-        />
-        <StatCard 
-          title="Total Revenue" 
-          value={`₹${totalRevenue.toFixed(2)}`} 
-          icon="💰" 
-          color="bg-yellow-100 text-yellow-800"
-        />
+    <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-slate-50 min-h-screen">
+      <h1 className="font-display text-3xl font-bold text-slate-900">Admin Dashboard</h1>
+      <p className="text-slate-500 mt-1">Platform overview and management</p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+        <StatCard icon={Users} label="Total Users" value={stats?.users || 0} color="bg-blue-100 text-blue-600" />
+        <StatCard icon={MapPin} label="Active Turfs" value={stats?.turfs || 0} color="bg-brand-100 text-brand-600" />
+        <StatCard icon={Calendar} label="Total Bookings" value={stats?.bookings || 0} color="bg-purple-100 text-purple-600" />
+        <StatCard icon={DollarSign} label="Revenue" value={`₹${stats?.revenue || 0}`} color="bg-amber-100 text-amber-600" />
       </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-bold mb-4">Recent Bookings</h2>
-          <div className="space-y-4">
-            {bookings.slice(0, 5).map((booking) => (
-              <div key={booking._id} className="border-b pb-4 last:border-b-0 last:pb-0">
-                <div className="flex justify-between">
-                  <span className="font-medium">{booking.turf.name}</span>
-                  <span className="text-gray-600">{new Date(booking.bookingDate).toLocaleDateString()}</span>
-                </div>
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>{booking.startTime} - {booking.endTime}</span>
-                  <span className="font-medium">₹{booking.totalAmount.toFixed(2)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-bold mb-4">Recent Users</h2>
-          <div className="space-y-4">
-            {users.slice(0, 5).map((user) => (
-              <div key={user._id} className="border-b pb-4 last:border-b-0 last:pb-0">
-                <div className="flex justify-between">
-                  <span className="font-medium">{user.name}</span>
-                  <span className="text-gray-600">{user.email}</span>
-                </div>
-                <div className="text-sm text-gray-500">
-                  Joined on {new Date(user.createdAt).toLocaleDateString()}
-                </div>
-              </div>
-            ))}
-          </div>
+
+      <div className="glass-card rounded-2xl p-6 mt-8">
+        <h2 className="font-semibold text-lg mb-4 flex items-center gap-2 text-slate-900">
+          <TrendingUp className="w-5 h-5 text-brand-600" /> Recent Bookings
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-slate-500 border-b border-slate-100">
+                <th className="text-left py-3 px-2">User</th>
+                <th className="text-left py-3 px-2">Turf</th>
+                <th className="text-left py-3 px-2">Date</th>
+                <th className="text-left py-3 px-2">Amount</th>
+                <th className="text-left py-3 px-2">Booking</th>
+                <th className="text-left py-3 px-2">Payment</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(recentBookings || []).map((b) => (
+                <tr key={b._id} className="border-b border-slate-50">
+                  <td className="py-3 px-2 text-slate-800">{b.user?.name}</td>
+                  <td className="py-3 px-2 text-slate-600">{b.turf?.name}</td>
+                  <td className="py-3 px-2 text-slate-600">{new Date(b.bookingDate).toLocaleDateString('en-IN')}</td>
+                  <td className="py-3 px-2 text-brand-600 font-medium">₹{b.totalAmount}</td>
+                  <td className="py-3 px-2"><Badge variant={statusVariant[b.status]}>{b.status}</Badge></td>
+                  <td className="py-3 px-2">
+                    <Badge variant={paymentVariant[b.payment?.status] || 'warning'}>
+                      {b.payment?.status || 'pending'}
+                    </Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
   );
-};
-
-export default AdminDashboard;
+}

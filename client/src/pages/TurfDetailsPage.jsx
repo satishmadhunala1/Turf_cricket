@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getTurfById } from "../features/turfs/turfSlice";
+import { BASE_URL } from "../constants";
 import Loader from "../components/Loader";
 import Message from "../components/Message";
 import DatePicker from "react-datepicker";
@@ -98,7 +99,7 @@ const TurfDetailsPage = () => {
 
     try {
       const res = await fetch(
-        "https://turf-cricket-backend.onrender.com/api/payments/create-checkout-session",
+        `${BASE_URL}/api/payments/create-checkout-session`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

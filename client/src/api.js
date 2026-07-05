@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { BASE_URL } from './constants';
 
-const API = axios.create({ baseURL: 'https://turf-cricket-backend.onrender.com' });
+const API = axios.create({ baseURL: BASE_URL });
 
 // Add a request interceptor to include the auth token
 API.interceptors.request.use((config) => {

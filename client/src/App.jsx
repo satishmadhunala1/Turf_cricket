@@ -1,56 +1,85 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import HomePage from './pages/HomePage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import TurfPage from './pages/TurfPage';
-import TurfDetailsPage from './pages/TurfDetailsPage';
-import BookingPage from './pages/BookingPage';
-import MyBookingsPage from './pages/MyBookingsPage';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import { AuthProvider } from './context/AuthContext';
+import MainLayout from './components/layout/MainLayout';
+import DashboardLayout from './components/layout/DashboardLayout';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import TurfListPage from './pages/turf/TurfListPage';
+import TurfDetailPage from './pages/turf/TurfDetailPage';
+import BookingPage from './pages/booking/BookingPage';
+import BookingSuccessPage from './pages/booking/BookingSuccessPage';
+
+import DashboardOverview from './pages/dashboard/DashboardOverview';
+import BookingsPage from './pages/dashboard/BookingsPage';
+import FavoritesPage from './pages/dashboard/FavoritesPage';
+import NotificationsPage from './pages/dashboard/NotificationsPage';
+import WalletPage from './pages/dashboard/WalletPage';
+import ProfilePage from './pages/dashboard/ProfilePage';
+import InvoicesPage from './pages/dashboard/InvoicesPage';
+import SettingsPage from './pages/dashboard/SettingsPage';
+
 import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminTurfs from './pages/admin/AdminTurfs';
-import AdminUsers from './pages/admin/AdminUsers';
-import AdminBookings from './pages/admin/AdminBookings';
-import PrivateRoute from './components/PrivateRoute';
-import AdminRoute from './components/AdminRoute';
+import OwnerDashboard from './pages/owner/OwnerDashboard';
 
-import PaymentSuccess from './pages/PaymentSuccess';
-import PaymentCancel from './pages/PaymentCancel';
-
-function App() {
+export default function App() {
   return (
-    <Router>
-      <Header />
-      <main className="min-h-screen">
+    <AuthProvider>
+      <BrowserRouter>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/turfs" element={<TurfPage />} />
-          <Route path="/turfs/:id" element={<TurfDetailsPage />} />
-          <Route path="/payment-success" element={<PaymentSuccess />} />
-          <Route path="/payment-cancel" element={<PaymentCancel />} />
-          
-          <Route path="" element={<PrivateRoute />}>
-            <Route path="/bookings" element={<BookingPage />} />
-            <Route path="/my-bookings" element={<MyBookingsPage />} />
+          <Route element={<MainLayout />}>
+            <Route index element={<LandingPage />} />
+            <Route path="login" element={<LoginPage />} />
+            <Route path="register" element={<RegisterPage />} />
+            <Route path="forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="turfs" element={<TurfListPage />} />
+            <Route path="turfs/:id" element={<TurfDetailPage />} />
+            <Route path="book/:id" element={<BookingPage />} />
+            <Route path="booking/success" element={<BookingSuccessPage />} />
+            <Route path="booking/success/:id" element={<BookingSuccessPage />} />
           </Route>
 
-          <Route path="" element={<AdminRoute />}>
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/turfs" element={<AdminTurfs />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
-            <Route path="/admin/bookings" element={<AdminBookings />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="dashboard" element={<DashboardLayout />}>
+              <Route index element={<DashboardOverview />} />
+              <Route path="bookings" element={<BookingsPage />} />
+              <Route path="favorites" element={<FavoritesPage />} />
+              <Route path="notifications" element={<NotificationsPage />} />
+              <Route path="wallet" element={<WalletPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="invoices" element={<InvoicesPage />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
+          </Route>
+
+          <Route element={<ProtectedRoute roles={['admin']} />}>
+            <Route path="admin" element={<AdminDashboard />} />
+          </Route>
+
+          <Route element={<ProtectedRoute roles={['owner', 'admin']} />}>
+            <Route path="owner" element={<OwnerDashboard />} />
           </Route>
         </Routes>
-      </main>
-      <Footer />
-      <ToastContainer />
-    </Router>
+      </BrowserRouter>
+
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#ffffff',
+            color: '#1e293b',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          },
+          success: { iconTheme: { primary: '#22c55e', secondary: '#fff' } },
+          error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
+        }}
+      />
+    </AuthProvider>
   );
 }
-
-export default App;
