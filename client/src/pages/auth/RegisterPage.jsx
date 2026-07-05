@@ -37,7 +37,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await registerUser(data);
-      navigate('/dashboard');
+      navigate('/');
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -54,7 +54,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="glass-card rounded-2xl p-8 space-y-5">
-          <GoogleLoginButton onSuccess={() => navigate('/dashboard')} />
+          <GoogleLoginButton onSuccess={() => navigate('/')} />
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>

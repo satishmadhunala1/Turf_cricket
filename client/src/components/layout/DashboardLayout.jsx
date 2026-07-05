@@ -38,7 +38,7 @@ export default function DashboardLayout() {
                   onClick={() => setSidebarOpen(false)}
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
-                      isActive ? 'bg-brand-500/20 text-brand-400' : 'text-slate-400 hover:text-white hover:bg-white/5'
+                      isActive ? 'bg-brand-500/20 text-brand-400' : 'text-slate-400 hover:text-black'
                     }`
                   }
                 >
